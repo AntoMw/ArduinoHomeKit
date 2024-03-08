@@ -1,10 +1,11 @@
 #include <WiFi.h>
-#include "env.h"
-//#include <Arduino_JSON.h>
 #include <ArduinoJson.h>
 #include <HTTPClient.h>
 #include <math.h>
 #include <avr/wdt.h>//watchdog
+
+#include "env.h"
+#include "typedefs.h"
 
 //Macros
 #define BAUDRATE 115200
@@ -17,8 +18,6 @@
 #define STATUS_LED     2
 #define CNT_LED        16
 #define FETCH_LED      17   
-
-//public
 
 
 //variables
@@ -123,7 +122,8 @@ void loop()
 }
 
 //reboots via watchdog
-void reboot() {
+void reboot() 
+{
   wdt_disable();
   wdt_enable(WDTO_15MS);
   while (1) { 
@@ -139,6 +139,9 @@ void reboot() {
 //
 void QueryCity_Data(String APIStr, bool isGEO_Query)
 {
+  String tmpCity;
+  String tmpC_Code;
+  string W_APIStr;
   client.begin(APIStr);
   httpCode =client.GET();
 
@@ -159,25 +162,28 @@ void QueryCity_Data(String APIStr, bool isGEO_Query)
     else
     {
       Serial.println("\nJson Deserialization Succeeded\n");
-      if(isGEO_Query)
+      if(isGEO_Query)//getting the lat, lon
       {
-        City
+        CityData.Name =doc1[0]["name"];
+        CityData.Country =doc1[0]["country"];
+        
+        tmpCity =CityData.Name;
+        tmpC_Code = CityData.Country;
+
+    
+        CityWeather.
+        Serial.println("Querried City: "+Bname+", Lat: "+String(BLat)+" & Lon: "+String(BLon)+"\n");
+      }
+      else //querrying using lat, lon
+      {
+        CityWeather.
         Serial.println("Querried City: "+Bname+", Lat: "+String(BLat)+" & Lon: "+String(BLon)+"\n");
       }
       
-      
-      
       //Serial.println(Res);
-      
-      
-      BLat = doc1[0]["lat"];
-      BLon = doc1[0]["lon"];
-      //BName =doc1[0]["name"];
-      String Bname =doc1[0]["name"];
-
-      Serial.println("Querried City: "+Bname+", Lat: "+String(BLat)+" & Lon: "+String(BLon)+"\n");
       //Serial.println"City: %s State: %s Co"untry: %s\n",doc1["0"]["name"],doc1["0"]["state"],doc1["0"]["Country"] );
     }
+
   }
   else
   {

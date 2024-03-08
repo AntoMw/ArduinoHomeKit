@@ -20,6 +20,7 @@ typedef enum
 typedef struct
 {
   String Name;
+  String Country;
   float Lat;
   float Lon;
 } CityQuery_st_t;
