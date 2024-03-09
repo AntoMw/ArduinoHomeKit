@@ -10,7 +10,7 @@
 //Macros
 #define BAUDRATE 115200
 #define FULL_GEO_STR "https://api.openweathermap.org/geo/1.0/direct?q=" BIRTH_CITY "," BIRTH_COUNTRY "&limit=1&appid=" APIKEY
-#define FULL_WEATHER_STR "https://api.openweathermap.org/data/2.5/weather?lat=" HOME_LAT "lon={" HOME_LON "&appid=" APIKEY
+#define FULL_WEATHER_STR "https://api.openweathermap.org/data/2.5/weather?lat=" HOME_LAT "lon=" HOME_LON "&appid=" APIKEY
 #define MAX_TMP_CNT 0xFF
 #define TMP_CNT_INC_DEC_RATIO 0x5
 
@@ -139,9 +139,10 @@ void reboot()
 //
 void QueryCity_Data(String APIStr, bool isGEO_Query)
 {
-  String tmpCity;
-  String tmpC_Code;
+  String tmpCity = "NOT Supplied";
+  String tmpC_Code = "NOT Supplied";
   string W_APIStr;
+  bool useW_Str = false;
   client.begin(APIStr);
   httpCode =client.GET();
 
@@ -164,15 +165,17 @@ void QueryCity_Data(String APIStr, bool isGEO_Query)
       Serial.println("\nJson Deserialization Succeeded\n");
       if(isGEO_Query)//getting the lat, lon
       {
-        CityData.Name =doc1[0]["name"];
-        CityData.Country =doc1[0]["country"];
-        
+        CityData.Name = doc1[0]["name"];
+        CityData.Country = doc1[0]["country"];
+        CityData.Lat = doc1[0]["lat"];
+        CityData.Lon = doc1[0]["lon"];
         tmpCity =CityData.Name;
         tmpC_Code = CityData.Country;
+        W_APIStr = "https://api.openweathermap.org/data/2.5/weather?lat="+CityData.Lat+"lon="+CityData.Lon+"&appid=" ##APIKEY
+        Serial.println(W_APIStr),
 
-    
-        CityWeather.
-        Serial.println("Querried City: "+Bname+", Lat: "+String(BLat)+" & Lon: "+String(BLon)+"\n");
+        useW_Str = true;
+        Serial.println("Querried City: "+CityData.Name+", Lat: "+CityData.Lat+" & Lon: "+CityData.Lon+"\n");
       }
       else //querrying using lat, lon
       {
