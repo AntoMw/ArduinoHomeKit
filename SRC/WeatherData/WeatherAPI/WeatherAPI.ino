@@ -10,7 +10,7 @@
 //Macros
 #define BAUDRATE 115200
 #define FULL_GEO_STR "https://api.openweathermap.org/geo/1.0/direct?q=" BIRTH_CITY "," BIRTH_COUNTRY "&limit=1&appid=" APIKEY
-#define FULL_WEATHER_STR "https://api.openweathermap.org/data/2.5/weather?lat=" HOME_LAT "lon=" HOME_LON "&appid=" APIKEY
+#define FULL_WEATHER_STR "https://api.openweathermap.org/data/2.5/weather?lat=" HOME_LAT "lon=" HOME_LON "&units=metric&appid=" APIKEY
 #define MAX_TMP_CNT 0xFF
 #define TMP_CNT_INC_DEC_RATIO 0x5
 
@@ -86,9 +86,7 @@ void loop()
   while(Connected == HomeKit_st)
   {
     
-    
-    
-    
+    //do stuff while kit is connected to internet
     delay(5000);
   }
   //loosing connection mid-execution
@@ -137,12 +135,11 @@ void reboot()
 }
 
 //
-void QueryCity_Data(String APIStr, bool isGEO_Query)
+void QueryCity_Data(String APIStr, bool isWeatherQ)
 {
   String tmpCity = "NOT Supplied";
   String tmpC_Code = "NOT Supplied";
   string W_APIStr;
-  bool useW_Str = false;
   client.begin(APIStr);
   httpCode =client.GET();
 
@@ -163,28 +160,31 @@ void QueryCity_Data(String APIStr, bool isGEO_Query)
     else
     {
       Serial.println("\nJson Deserialization Succeeded\n");
-      if(isGEO_Query)//getting the lat, lon
+      if(isWeatherQ)//getting the weather Data
+      {
+        CityWeather.Name           = CityData.Name;
+        CityWeather.Country        = CityData.Country;
+        CityWeather.Temp           = doc1["current"]["temp"];
+        CityWeather.TempMax        = doc1["daily"]["temp"]["max"];
+        CityWeather.TempMin        = doc1["daily"]["temp"]["min"];
+        CityWeather.FeelsLike      = doc1["current"]["feels_like"];
+        CityWeather.UVidx          = doc1["hourly"]["uvi"];
+        CityWeather.HH_MainWeather = doc1["hourly"]["weather"]["main"];
+        CityWeather.HH_WeatherDesc = doc1["hourly"]["weather"]["description"];
+        CityWeather.DD_DailySummary= doc1["daily"]["summary"];
+
+        Serial.println("City Weather Querried: "+CityWeather.Name+", Country: "+CityWeather.Country+" & Daily Summary: ["+CityWeather.DD_DailySummary+"]\n");
+      }
+      else //querrying lat, lon
       {
         CityData.Name = doc1[0]["name"];
         CityData.Country = doc1[0]["country"];
         CityData.Lat = doc1[0]["lat"];
         CityData.Lon = doc1[0]["lon"];
-        tmpCity =CityData.Name;
-        tmpC_Code = CityData.Country;
-        W_APIStr = "https://api.openweathermap.org/data/2.5/weather?lat="+CityData.Lat+"lon="+CityData.Lon+"&appid=" ##APIKEY
-        Serial.println(W_APIStr),
 
-        useW_Str = true;
         Serial.println("Querried City: "+CityData.Name+", Lat: "+CityData.Lat+" & Lon: "+CityData.Lon+"\n");
       }
-      else //querrying using lat, lon
-      {
-        CityWeather.
-        Serial.println("Querried City: "+Bname+", Lat: "+String(BLat)+" & Lon: "+String(BLon)+"\n");
-      }
-      
       //Serial.println(Res);
-      //Serial.println"City: %s State: %s Co"untry: %s\n",doc1["0"]["name"],doc1["0"]["state"],doc1["0"]["Country"] );
     }
 
   }
