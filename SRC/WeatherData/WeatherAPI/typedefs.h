@@ -41,6 +41,7 @@ typedef struct
   String DD_DailySummary;//daily.summary
 }Weather_st_t;
 
+
 #endif
 
 

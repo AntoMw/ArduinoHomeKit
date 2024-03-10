@@ -2,7 +2,7 @@
 #include <ArduinoJson.h>
 #include <HTTPClient.h>
 #include <math.h>
-#include <avr/wdt.h>//watchdog
+//#include <avr/wdt.h>//watchdog
 
 #include "env.h"
 #include "typedefs.h"
@@ -34,13 +34,13 @@ void setup() {
   //pinModes
   pinMode(STATUS_LED, OUTPUT);
   pinMode(CNT_LED, OUTPUT);
-  pinMode(FETCH_LED);
+  pinMode(FETCH_LED, OUTPUT);
 
 
   Serial.begin(BAUDRATE);
   WiFi.begin(SSID, PWORD);
   
-  Serial.println("\n++++++++++++++++\nHomekit \n++++++++++++++++");
+  Serial.println("\n++++++++++++++++\nHomekit\n++++++++++++++++");
   Serial.print("\nConnecting to WiFi");
 
   while(WL_CONNECTED != WiFi.status())
@@ -58,6 +58,8 @@ void setup() {
 
   //Serial.println(APIStr);
   //get coordinates for NBO
+  QueryCityData(FULL_GEO_STR , false);
+  //QueryCityData(FULL_GEO_STR , false);
   
   
 }
@@ -113,14 +115,14 @@ void loop()
       delay(500);
     }
     delay(1000);
-    reboot();
+    //reboot();
   }
 
   delay(1000);//the loop function is delayed 1s‚
 }
 
 //reboots via watchdog
-void reboot() 
+/*void reboot() 
 {
   wdt_disable();
   wdt_enable(WDTO_15MS);
@@ -134,8 +136,10 @@ void reboot()
   }
 }
 
+*/
+
 //
-void QueryCity_Data(String APIStr, bool isWeatherQ)
+void QueryCityData(String APIStr, bool isWeatherQ)
 {
   String tmpCity = "NOT Supplied";
   String tmpC_Code = "NOT Supplied";
