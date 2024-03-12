@@ -1,2 +1,3 @@
 #ignore the environment secrets file
 /env.h
+SRC/WeatherData/WeatherAPI/env.h
