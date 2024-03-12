@@ -1,6 +1,6 @@
 
 
-//Author    : Kioko
+//Author    : Kioko M
 //Purpose   : Environment to hold sensitve data and keys for my project.
 
 #ifndef env_h
