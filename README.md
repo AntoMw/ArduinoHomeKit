@@ -10,9 +10,13 @@ https://docs.espressif.com/projects/esp-idf/en/latest/esp32/
 
 
 ## Project Planned Features
-[x] Weather Check API -WIP
-[ ] Temperature Sensor NTC 3.16K
-[ ] Sunlight Sensor + Blinds Actuator
-[ ] Humidity Sensor
-[ ] Home Automation Integration W Google Home
+- [x] Weather Check API -WIP
+
+- [ ] Temperature Sensor NTC 3.16K
+
+- [ ] Sunlight Sensor + Blinds Actuator
+
+- [ ] Humidity Sensor
+
+- [ ] Home Automation Integration W Google Home
 
