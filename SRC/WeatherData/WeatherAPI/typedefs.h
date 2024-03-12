@@ -30,7 +30,7 @@ typedef struct
 typedef struct
 {
   String Name;
-  String Country;
+  String Country;//Country Code
   float Temp;//current.temp
   float TempMax;//daily.temp.max
   float TempMin;//daily.temp.min
