@@ -4,42 +4,9 @@
 #ifndef typedefs_h
 #define typedefs_h
 
-typedef enum 
-{
-  Disconnected =0xFF,
-  Connected = 0x0,    //0x00
-  InternalError,
-  InputError,
-  Undefined,
-  ConnectionFailed,
-  ConnectionLost
-  
-} HomeKit_st_t; 
+#define MAX_STRING_LENGTH 2048 //characters
 
-
-typedef struct
-{
-  String Name;
-  String Country;
-  float Lat;
-  float Lon;
-} CityQuery_st_t;
-
-
-
-typedef struct
-{
-  String Name;
-  String Country;//Country Code
-  float Temp;//current.temp
-  float TempMax;//daily.temp.max
-  float TempMin;//daily.temp.min
-  float FeelsLike;//current.feels_like
-  float  UVidx;//hourly.uvi
-  String HH_MainWeather;//hourly.weather.main
-  String HH_WeatherDesc;//hourly.weather.description
-  String DD_DailySummary;//daily.summary
-}Weather_st_t;
+typedef char string[MAX_STRING_LENGTH]; //representation of string literal for my header files. easier to handle with ino files.
 
 
 #endif
