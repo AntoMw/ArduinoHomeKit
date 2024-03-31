@@ -177,28 +177,28 @@ void QueryCityData(String APIStr, int isWeatherQ)
   //client.begin(APIStr);
   client.begin(FULL_WEATHER_STR);
   httpCode =client.GET();
-  Serial.println("\nQuery : "+APIStr+"\n");
+  Serial.println("\nQuery: "+APIStr);
 
   if(0<httpCode)
   {
     String Res =client.getString();
-    Serial.println("\nRes : "+Res+"\n");
-    Serial.println("\nQuery StatusCode: "+String(httpCode));
+    Serial.println("\nRes: "+Res);
     DeserializationError Err = deserializeJson(doc1, Res);
     
     if(Err)//bool
     {
-      Serial.print("\nJson Deserialization Failed with Code: ");
+      Serial.print("Json Deserialization Failed with Code: ");
       Serial.println(Err.f_str());//print error
       HomeKit_st = InternalError;
     }
     else
     {
-      Serial.println("\nJson Deserialization Succeeded\n");
+      Serial.println("Json Deserialization Succeeded\n");
       //control logic for correct responses.
       switch(httpCode)
       {
         case 200:
+          Serial.println("API Response: "+String(httpCode)+"\nMessage: Success");
           getWeatherD(isWeatherQ);
           break;
         default:
@@ -218,33 +218,33 @@ void QueryCityData(String APIStr, int isWeatherQ)
 
 void getWeatherD(int isWeatherQ)
 {
-      if(isWeatherQ)//getting the weather Data
-      {
-        CityWeather.Name           = CityData.Name;
-        CityWeather.Country        = CityData.Country;
-        CityWeather.Temp           = doc1["current"]["temp"];
-        CityWeather.TempMax        = doc1["daily"]["temp"]["max"];
-        CityWeather.TempMin        = doc1["daily"]["temp"]["min"];
-        CityWeather.FeelsLike      = doc1["current"]["feels_like"];
-        CityWeather.UVidx          = doc1["hourly"]["uvi"];
-        CityWeather.HH_MainWeather = (const char*)doc1["hourly"]["weather"]["main"];
-        CityWeather.HH_WeatherDesc = (const char*)doc1["hourly"]["weather"]["description"];
-        CityWeather.DD_DailySummary= (const char*)doc1["daily"]["summary"];
+  if(isWeatherQ)//getting the weather Data
+  {
+    CityWeather.Name           = CityData.Name;
+    CityWeather.Country        = CityData.Country;
+    CityWeather.Temp           = doc1["current"]["temp"];
+    CityWeather.TempMax        = doc1["daily"]["temp"]["max"];
+    CityWeather.TempMin        = doc1["daily"]["temp"]["min"];
+    CityWeather.FeelsLike      = doc1["current"]["feels_like"];
+    CityWeather.UVidx          = doc1["hourly"]["uvi"];
+    CityWeather.HH_MainWeather = (const char*)doc1["hourly"]["weather"]["main"];
+    CityWeather.HH_WeatherDesc = (const char*)doc1["hourly"]["weather"]["description"];
+    CityWeather.DD_DailySummary= (const char*)doc1["daily"]["summary"];
 
-        Serial.println("City Weather Querried: "+CityWeather.Name+", Country: "+CityWeather.Country);
-        Serial.println("Daily Summary: ["+CityWeather.DD_DailySummary+"]\n");
+    Serial.println("City Weather Querried: "+CityWeather.Name+", Country: "+CityWeather.Country);
+    Serial.println("Daily Summary: ["+CityWeather.DD_DailySummary+"]\n");
 
-      }
-      else //querrying lat, lon
-      {
-        CityData.Name    = (const char*)doc1[0]["name"];
-        CityData.Country = (const char*)doc1[0]["country"];
-        CityData.Lat     = doc1[0]["lat"];
-        CityData.Lon     = doc1[0]["lon"];
+  }
+  else //querrying lat, lon
+  {
+    CityData.Name    = (const char*)doc1[0]["name"];
+    CityData.Country = (const char*)doc1[0]["country"];
+    CityData.Lat     = doc1[0]["lat"];
+    CityData.Lon     = doc1[0]["lon"];
 
-        Serial.println("Querried City: "+CityData.Name+", Country: "+CityData.Country+"Lat: "+CityData.Lat+" & Lon: "+CityData.Lon+"\n");
-      }
-      //Serial.println(Res);
+    Serial.println("Querried City: "+CityData.Name+", Country: "+CityData.Country+"Lat: "+CityData.Lat+" & Lon: "+CityData.Lon+"\n");
+  }
+  //Serial.println(Res);
 }
 
 HomeKit_st_t getApiReqErr(int HTTPRes)
