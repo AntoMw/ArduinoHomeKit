@@ -1,3 +1,7 @@
+//Author    : Kioko M
+//Date      : 16.03.2024
+//Purpose   : Implementation for the HomeControl Kit
+
 #include <WiFi.h>
 #include <ArduinoJson.h>
 #include <HTTPClient.h>
@@ -6,12 +10,8 @@
 
 //Backbone
 #include "env.h"
-#include "typedefs.h"
-
-//Modules
 #include "HomeControl.h"
-#include ""
-
+#include "HomeSensors.h"
 
 //Main Macros
 #define BAUDRATE 115200
@@ -26,8 +26,44 @@
 #define FETCH_LED      17   
 
 
+//holds the City Query Data, use for unkown lat lon coordniates
+typedef struct
+{
+  String Name;
+  String Country;
+  float Lat;
+  float Lon;
+} CityQuery_st_t;
 
-HomeKit_st = Disconnected;
+//struct for all needed weather details
+typedef struct
+{
+  String Name;
+  String Country;//Country Code
+  float Temp;//current.temp
+  float TempMax;//daily.temp.max
+  float TempMin;//daily.temp.min
+  float FeelsLike;//current.feels_like
+  float  UVidx;//hourly.uvi
+  String HH_MainWeather;//hourly.weather.main
+  String HH_WeatherDesc;//hourly.weather.description
+  String DD_DailySummary;//daily.summary
+}Weather_st_t;
+
+//function prototypes
+void reboot();
+void QueryCityData(String APIStr, int isWeatherQ);
+float getCurrTemp(int Room);
+float getLightIntensity(int Room, int Window);
+float getHumidtyLevel(int Room);
+int8_t getSwitchStatus(int SwitchNo);
+int8_t setSwitchState(int SwitchNo, int State);
+void toggleSwitchState(int SwitchNo);
+
+//variables
+CityQuery_st_t CityData;
+Weather_st_t CityWeather;
+HomeKit_st_t HomeKit_st;
 
 HTTPClient client;
 int httpCode =-1;
@@ -61,8 +97,7 @@ void setup() {
   Serial.println("HomeKit_st Val: "+String(HomeKit_st));
 
   //Serial.println(APIStr);
-  //get coordinates for NBO
-  QueryCityData(WeatherQStr , false);
+  QueryCityData(WeatherQStr , 1);
   //QueryCityData(FULL_GEO_STR , false);
   
   
@@ -70,11 +105,7 @@ void setup() {
 
 void loop() 
 {
-  //variables
   int8_t tempQcnt =0;
-
-
-  // put your main code here, to run repeatedly:
   if(WL_CONNECTED == WiFi.status())
   {
     HomeKit_st = Connected;
@@ -91,7 +122,6 @@ void loop()
   //state machine ==connected
   while(Connected == HomeKit_st)
   {
-    
     //do stuff while kit is connected to internet
     delay(5000);
   }
@@ -112,8 +142,9 @@ void loop()
   if(Undefined ==HomeKit_st)
   {
     //trigger reboot
-    Serial.println("\n An Internal Error Occured, Rebooting the HomeKit...")
-    for(int8_t i=0;i<9;i++)
+    Serial.println("\n An Internal Error Occured, Rebooting the HomeKit...");
+    int8_t i=0;
+    for(i;i<9;i++)
     {
       digitalWrite(STATUS_LED, !digitalRead(STATUS_LED));
       delay(500);
@@ -124,6 +155,69 @@ void loop()
 
   delay(1000);//the loop function is delayed 1s‚
 }
+
+//definitions go here...
+void QueryCityData(String APIStr, int isWeatherQ)
+{
+  String tmpCity = "NOT Supplied";
+  String tmpC_Code = "NOT Supplied";
+  String W_APIStr;
+  client.begin(APIStr);
+  httpCode =client.GET();
+
+  if(0<httpCode)
+  {
+    String Res =client.getString();
+    Serial.println("\nQuery StatusCode: "+String(httpCode));
+
+    JsonDocument doc1;
+    DeserializationError Err = deserializeJson(doc1, Res);
+    
+    if(Err)//bool
+    {
+      Serial.print("\nJson Deserialization Failed with Code: ");
+      Serial.println(Err.f_str());//print error
+      HomeKit_st = InternalError;
+    }
+    else
+    {
+      Serial.println("\nJson Deserialization Succeeded\n");
+      if(isWeatherQ)//getting the weather Data
+      {
+        CityWeather.Name           = CityData.Name;
+        CityWeather.Country        = CityData.Country;
+        CityWeather.Temp           = doc1["current"]["temp"];
+        CityWeather.TempMax        = doc1["daily"]["temp"]["max"];
+        CityWeather.TempMin        = doc1["daily"]["temp"]["min"];
+        CityWeather.FeelsLike      = doc1["current"]["feels_like"];
+        CityWeather.UVidx          = doc1["hourly"]["uvi"];
+        CityWeather.HH_MainWeather = doc1["hourly"]["weather"]["main"];
+        CityWeather.HH_WeatherDesc = doc1["hourly"]["weather"]["description"];
+        CityWeather.DD_DailySummary= doc1["daily"]["summary"];
+
+        Serial.println("City Weather Querried: "+CityWeather.Name+", Country: "+CityWeather.Country+" & Daily Summary: ["+CityWeather.DD_DailySummary+"]\n");
+      }
+      else //querrying lat, lon
+      {
+        CityData.Name = doc1[0]["name"];
+        CityData.Country = doc1[0]["country"];
+        CityData.Lat = doc1[0]["lat"];
+        CityData.Lon = doc1[0]["lon"];
+
+        Serial.println("Querried City: "+CityData.Name+", Lat: "+CityData.Lat+" & Lon: "+CityData.Lon+"\n");
+      }
+      //Serial.println(Res);
+    }
+
+  }
+  else
+  {
+    Serial.println("\n\n An Error Occured!, Status Code: "+String(httpCode));
+  }
+
+}
+
+
 
 //reboots via watchdog
 /*void reboot() 
@@ -141,8 +235,5 @@ void loop()
 }
 
 */
-
-//
-
 
 

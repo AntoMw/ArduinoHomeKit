@@ -1,14 +1,11 @@
-//Author    : Kioko
-//Date      : 16.03.2024
-//Purpose   : Contains the declarations for the Weather Query 
-//            functionality of the HomeKit
-
-#include "typedefs.h"
+//Author    : Kioko M
+//Date      : 31.03.2024
+//Purpose   : Contains the declarations, type defintions for the Weather HomeKit App
 
 #ifndef homecontrol_h
 #define homecontrol_h
 
-//denotes the operating state of thze homekit
+//denotes the operating state of the homekit
 typedef enum 
 {
   Disconnected =0xFF,
@@ -19,9 +16,6 @@ typedef enum
   ConnectionFailed,
   ConnectionLost
 } HomeKit_st_t; 
-
-extern HomeKit_st_t HomeKit_st;
-
 
 #endif
 

@@ -1,9 +1,8 @@
-//Author    : Kioko
+//Author    : Kioko M
 //Date      : 16.03.2024
 //Purpose   : Contains the declarations for the Weather Query 
 //            functionality of the HomeKit
 
-#include "typedefs.h"
 
 #ifndef homesensors_h
 #define homesensors_h
@@ -17,16 +16,6 @@
 
 //outputs
 
-
-
-
-//functions
-float getCurrTemp(int Room);
-float getLightIntensity(int Room, int Window);
-float getHumidtyLevel(int Room);
-int8_t getSwitchStatus(int SwitchNo);
-int8_t setSwitchState(int SwitchNo, int State);
-void toggleSwitchState(int SwitchNo);
 
 //rooms
 typedef enum
@@ -64,14 +53,6 @@ typedef enum
   BathRoom_B,
   Kitchen_B,
 }Blinds_en_t;
-
-//public variables
-extern float CurrRoomTemp;
-extern float CurrLightIntensity;
-
-
-
-
 
 #endif
 
