@@ -29,6 +29,13 @@
 //holds the City Query Data, use for unkown lat lon coordniates
 typedef struct
 {
+  int Code;
+  String Message;
+  String Params;
+} APIErrRes_st_t;
+
+typedef struct
+{
   String Name;
   String Country;
   float Lat;
@@ -53,6 +60,8 @@ typedef struct
 //function prototypes
 void reboot();
 void QueryCityData(String APIStr, int isWeatherQ);
+void getWeatherD(int isWeatherQ);
+HomeKit_st_t getApiReqErr(int HTTPRes);
 float getCurrTemp(int Room);
 float getLightIntensity(int Room, int Window);
 float getHumidtyLevel(int Room);
@@ -61,11 +70,13 @@ int setSwitchState(int SwitchNo, int State);
 void toggleSwitchState(int SwitchNo);
 
 //variables
+APIErrRes_st_t APIErr;
 CityQuery_st_t CityData;
 Weather_st_t CityWeather;
 HomeKit_st_t HomeKit_st;
 
 HTTPClient client;
+JsonDocument doc1;
 int httpCode =-1;
 
 
@@ -123,7 +134,7 @@ void loop()
   while(Connected == HomeKit_st)
   {
     //do stuff while kit is connected to internet
-    digitalWrite(FETCH_LED, !digitalRead(FETCH_LED));
+    
     //delay(5000);
   }
   //loosing connection mid-execution
@@ -143,7 +154,7 @@ void loop()
   if(Undefined ==HomeKit_st)
   {
     //trigger reboot
-    Serial.println("\n An Internal Error Occured, Rebooting the HomeKit...");
+    Serial.println("\nAn Internal Error Occured, Rebooting the HomeKit...");
     int8_t i=0;
     for(i;i<9;i++)
     {
@@ -153,7 +164,7 @@ void loop()
     delay(1000);
     //reboot();
   }
-
+  digitalWrite(FETCH_LED, !digitalRead(FETCH_LED));
   delay(1000);//the loop function is delayed 1s‚
 }
 
@@ -163,15 +174,16 @@ void QueryCityData(String APIStr, int isWeatherQ)
   String tmpCity = "NOT Suplied";
   String tmpC_Code = "NOT Suplied";
   String W_APIStr;
-  client.begin(APIStr);
+  //client.begin(APIStr);
+  client.begin(FULL_WEATHER_STR);
   httpCode =client.GET();
+  Serial.println("\nQuery : "+APIStr+"\n");
 
   if(0<httpCode)
   {
     String Res =client.getString();
+    Serial.println("\nRes : "+Res+"\n");
     Serial.println("\nQuery StatusCode: "+String(httpCode));
-
-    JsonDocument doc1;
     DeserializationError Err = deserializeJson(doc1, Res);
     
     if(Err)//bool
@@ -183,6 +195,29 @@ void QueryCityData(String APIStr, int isWeatherQ)
     else
     {
       Serial.println("\nJson Deserialization Succeeded\n");
+      //control logic for correct responses.
+      switch(httpCode)
+      {
+        case 200:
+          getWeatherD(isWeatherQ);
+          break;
+        default:
+          getApiReqErr(httpCode);//APIresponse Err
+          break;
+      }
+    }
+
+  }
+  else
+  {
+    Serial.println("\n\n An Error Occured!, Status Code: "+String(httpCode));
+    HomeKit_st = InternalError;
+  }
+
+}
+
+void getWeatherD(int isWeatherQ)
+{
       if(isWeatherQ)//getting the weather Data
       {
         CityWeather.Name           = CityData.Name;
@@ -207,17 +242,39 @@ void QueryCityData(String APIStr, int isWeatherQ)
         CityData.Lat     = doc1[0]["lat"];
         CityData.Lon     = doc1[0]["lon"];
 
-        Serial.println("Querried City: "+CityData.Name+", Lat: "+CityData.Lat+" & Lon: "+CityData.Lon+"\n");
+        Serial.println("Querried City: "+CityData.Name+", Country: "+CityData.Country+"Lat: "+CityData.Lat+" & Lon: "+CityData.Lon+"\n");
       }
       //Serial.println(Res);
-    }
+}
 
-  }
-  else
+HomeKit_st_t getApiReqErr(int HTTPRes)
+{
+  APIErr.Code     = doc1["cod"];
+  APIErr.Message  = (const char*)doc1["message"];
+  APIErr.Params   = (const char*)doc1["parameters"];
+  //control logic for possible weather API errorCodes
+  Serial.println("API Response Error: "+String(HTTPRes));
+  switch (HTTPRes)
   {
-    Serial.println("\n\n An Error Occured!, Status Code: "+String(httpCode));
+  case 400:
+    Serial.println("Message: "+APIErr.Message+"\nReasons: Some mandatory parameters in the request are missing\n");
+    break;
+  case 401:
+    Serial.println("Message: "+APIErr.Message+"\nReasons: API API token provided in the request does not grant access to this API.\n");
+    break;
+  case 404:
+    Serial.println("Message: "+APIErr.Message+"\nReasons: There is no data for the entry you provided in the API request.\n");
+    break;
+  case 429:
+    Serial.println("Message: "+APIErr.Message+"\nReasons: API Key quota of requests is exceeded.\n");
+    break;
+  default:
+    Serial.println("Message: "+APIErr.Message+"\nReasons: The API Error Response is unique, please contact WeatherApi.org.\n");
+    break;
   }
 
+  HomeKit_st = InputError;
+  return InputError;
 }
 
 
