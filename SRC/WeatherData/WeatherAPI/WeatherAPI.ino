@@ -56,8 +56,8 @@ void QueryCityData(String APIStr, int isWeatherQ);
 float getCurrTemp(int Room);
 float getLightIntensity(int Room, int Window);
 float getHumidtyLevel(int Room);
-int8_t getSwitchStatus(int SwitchNo);
-int8_t setSwitchState(int SwitchNo, int State);
+int getSwitchStatus(int SwitchNo);
+int setSwitchState(int SwitchNo, int State);
 void toggleSwitchState(int SwitchNo);
 
 //variables
@@ -123,7 +123,8 @@ void loop()
   while(Connected == HomeKit_st)
   {
     //do stuff while kit is connected to internet
-    delay(5000);
+    digitalWrite(FETCH_LED, !digitalRead(FETCH_LED));
+    //delay(5000);
   }
   //loosing connection mid-execution
   while(Disconnected == HomeKit_st)
@@ -159,8 +160,8 @@ void loop()
 //definitions go here...
 void QueryCityData(String APIStr, int isWeatherQ)
 {
-  String tmpCity = "NOT Supplied";
-  String tmpC_Code = "NOT Supplied";
+  String tmpCity = "NOT Suplied";
+  String tmpC_Code = "NOT Suplied";
   String W_APIStr;
   client.begin(APIStr);
   httpCode =client.GET();
@@ -191,18 +192,20 @@ void QueryCityData(String APIStr, int isWeatherQ)
         CityWeather.TempMin        = doc1["daily"]["temp"]["min"];
         CityWeather.FeelsLike      = doc1["current"]["feels_like"];
         CityWeather.UVidx          = doc1["hourly"]["uvi"];
-        CityWeather.HH_MainWeather = doc1["hourly"]["weather"]["main"];
-        CityWeather.HH_WeatherDesc = doc1["hourly"]["weather"]["description"];
-        CityWeather.DD_DailySummary= doc1["daily"]["summary"];
+        CityWeather.HH_MainWeather = (const char*)doc1["hourly"]["weather"]["main"];
+        CityWeather.HH_WeatherDesc = (const char*)doc1["hourly"]["weather"]["description"];
+        CityWeather.DD_DailySummary= (const char*)doc1["daily"]["summary"];
 
-        Serial.println("City Weather Querried: "+CityWeather.Name+", Country: "+CityWeather.Country+" & Daily Summary: ["+CityWeather.DD_DailySummary+"]\n");
+        Serial.println("City Weather Querried: "+CityWeather.Name+", Country: "+CityWeather.Country);
+        Serial.println("Daily Summary: ["+CityWeather.DD_DailySummary+"]\n");
+
       }
       else //querrying lat, lon
       {
-        CityData.Name = doc1[0]["name"];
-        CityData.Country = doc1[0]["country"];
-        CityData.Lat = doc1[0]["lat"];
-        CityData.Lon = doc1[0]["lon"];
+        CityData.Name    = (const char*)doc1[0]["name"];
+        CityData.Country = (const char*)doc1[0]["country"];
+        CityData.Lat     = doc1[0]["lat"];
+        CityData.Lon     = doc1[0]["lon"];
 
         Serial.println("Querried City: "+CityData.Name+", Lat: "+CityData.Lat+" & Lon: "+CityData.Lon+"\n");
       }
