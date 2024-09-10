@@ -54,6 +54,16 @@ typedef enum
   Kitchen_B,
 }Blinds_en_t;
 
+
+
+//functions
+extern float getCurrTemp(float adcCNT, int maxR, float VCC );
+extern float getLightIntensity(int Room, int Window);
+extern float getHumidtyLevel(int Room);
+extern int getSwitchStatus(int SwitchNo);
+extern int setSwitchState(int SwitchNo, int State);
+extern void toggleSwitchState(int SwitchNo);
+
 #endif
 
 

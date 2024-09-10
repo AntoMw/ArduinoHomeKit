@@ -17,8 +17,7 @@
 #define BAUDRATE 115200
 #define FULL_GEO_STR "https://api.openweathermap.org/geo/1.0/direct?q=" BIRTH_CITY "," BIRTH_COUNTRY "&limit=1&appid=" APIKEY
 #define FULL_WEATHER_STR "https://api.openweathermap.org/data/2.5/weather?lat=" HOME_LAT "lon=" HOME_LON "&units=metric&appid=" APIKEY
-#define MAX_TMP_CNT 0xFF
-#define TMP_CNT_INC_DEC_RATIO 0x5
+
 
 //pins
 #define STATUS_LED     2
@@ -62,12 +61,7 @@ void reboot();
 void QueryCityData(String APIStr, int isWeatherQ);
 void getWeatherD(int isWeatherQ);
 HomeKit_st_t getApiReqErr(int HTTPRes);
-float getCurrTemp(int Room);
-float getLightIntensity(int Room, int Window);
-float getHumidtyLevel(int Room);
-int getSwitchStatus(int SwitchNo);
-int setSwitchState(int SwitchNo, int State);
-void toggleSwitchState(int SwitchNo);
+
 
 //variables
 APIErrRes_st_t APIErr;
@@ -105,7 +99,7 @@ void setup() {
   Serial.println(WiFi.localIP());
   HomeKit_st = Connected;
 
-  Serial.println("HomeKit_st Val: "+String(HomeKit_st));
+  Serial.println("HomeKit_st Status: "+String(HomeKit_st));
 
   //Serial.println(APIStr);
   QueryCityData(WeatherQStr , 1);
@@ -139,6 +133,7 @@ void loop()
     delay(1000);//the loop function is delayed 1s‚
     //delay(5000);
   }
+
   //loosing connection mid-execution
   while(Disconnected == HomeKit_st)
   {
@@ -243,6 +238,7 @@ void getWeatherD(int isWeatherQ)
     CityData.Country = (const char*)doc1[0]["country"];
     CityData.Lat     = doc1[0]["lat"];
     CityData.Lon     = doc1[0]["lon"];
+  
 
     Serial.println("Querried City: "+CityData.Name+", Country: "+CityData.Country+" Lat: "+CityData.Lat+" & Lon: "+CityData.Lon+"\n");
   }
